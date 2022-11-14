@@ -78,23 +78,23 @@ jobs:
           RELEASE_BRANCHES: ‘main’
           DEFAULT_BUMP: patch
 
-  get_commit_sha:
-    name: Get SHA
-    # Will only do this step, if these steps have passed
-    needs: [lint-test, security-checks]
-    runs-on: ubuntu-latest
-    outputs:
-      sha_output: ${{ steps.short_sha_generator.outputs.SHORT_SHA }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-      - name: Get short SHA
-        id: short_sha_generator
-        run: echo “SHORT_SHA=$(git rev-parse --short HEAD)” >> $GITHUB_OUTPUT
+  # get_commit_sha:
+  #   name: Get SHA
+  #   # Will only do this step, if these steps have passed
+  #   needs: [lint-test, security-checks]
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     sha_output: ${{ steps.short_sha_generator.outputs.SHORT_SHA }}
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v3
+  #     - name: Get short SHA
+  #       id: short_sha_generator
+  #       run: echo “SHORT_SHA=$(git rev-parse --short HEAD)” >> $GITHUB_OUTPUT
 
   push_to_docker:
     name: Push image to docker
-    needs: [bump_version, get_commit_sha]
+    needs: [bump_version] # get_commit_sha removed
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -104,9 +104,8 @@ jobs:
         with:
           # Image name in docker
           image: jhjsdeveloper/places-app
-          tags: latest, ${{ needs.get_commit_sha.outputs.sha_output }}-SNAPSHOT, ${{ needs.bump_version.outputs.new_tag }}-SNAPSHOT
+          # Removed ${{ needs.get_commit_sha.outputs.sha_output }}-SNAPSHOT
+          tags: latest, ${{ needs.bump_version.outputs.new_tag }}-SNAPSHOT
           registry: docker.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-
-          # Snyk and Docker Hub
