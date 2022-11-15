@@ -106,7 +106,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build
-        run: npm build --if-present
+        run: npm run build --if-present
       - name: Inject version
         run: | 
           echo "window['appConfig'] = {\"version\": \"${{ needs.bump_version.outputs.new_tag }}\"}" > build/app-config.js
